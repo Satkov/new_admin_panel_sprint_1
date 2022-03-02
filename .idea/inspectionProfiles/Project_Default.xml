@@ -1,0 +1,81 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="DuplicatedCode" enabled="true" level="WEAK WARNING" enabled_by_default="true">
+      <Languages>
+        <language minSize="112" name="Python" />
+      </Languages>
+    </inspection_tool>
+    <inspection_tool class="Eslint" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="PyArgumentListInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredPackages">
+        <value>
+          <list size="1">
+            <item index="0" class="java.lang.String" itemvalue="users" />
+          </list>
+        </value>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyPep8Inspection" enabled="true" level="WEAK WARNING" enabled_by_default="true">
+      <option name="ignoredErrors">
+        <list>
+          <option value="E124" />
+          <option value="E221" />
+        </list>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyPep8NamingInspection" enabled="true" level="WEAK WARNING" enabled_by_default="true">
+      <option name="ignoredErrors">
+        <list>
+          <option value="N802" />
+          <option value="N806" />
+          <option value="N801" />
+        </list>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyShadowingBuiltinsInspection" enabled="true" level="WEAK WARNING" enabled_by_default="true">
+      <option name="ignoredNames">
+        <list>
+          <option value="KeyError" />
+          <option value="next" />
+        </list>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyTypeCheckerInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="PyUnreachableCodeInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="PyUnresolvedReferencesInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredIdentifiers">
+        <list>
+          <option value="posting.posting.models.PhotoPost.objects" />
+          <option value="posting.posting.models.VideoPost.objects" />
+          <option value="api_server.posts.models.PhotoPost.objects" />
+          <option value="api_server.posts.models.VideoPost.objects" />
+          <option value="api_server.posts.views.request" />
+          <option value="api_server.posts.models.Post.objects" />
+          <option value="api_server.posts.models.fb_api" />
+          <option value="api_server.posts_api.models.Post.objects" />
+          <option value="django_q.models.Schedule.objects" />
+          <option value="django_q.models.Schedule.id" />
+          <option value="backend.foodgram.users.models.Follow.objects" />
+          <option value="backend.foodgram.users.views.UsersReadViewSet.perform_update" />
+          <option value="rest_framework.filters.DjangoFilterBackend" />
+          <option value="backend.foodgram.products.models.Recipe.objects" />
+          <option value="backend.foodgram.products.models.FavoriteRecipes.objects" />
+          <option value="backend.foodgram.products.models.ShoppingCart.objects" />
+          <option value="backend.foodgram.products.models.Ingredient.objects" />
+          <option value="backend.foodgram.products.models.Product.objects" />
+          <option value="backend.foodgram.products.serializers.users" />
+          <option value="backend.foodgram.products.models.Tag.objects" />
+          <option value="backend.foodgram.products.models.Follow.objects" />
+          <option value="backend.foodgram.products.models.FavoriteRecipe.objects" />
+          <option value="reccy.users.models.User.DoesNotExist" />
+          <option value="Exception.message" />
+          <option value="server.users.apis.api" />
+          <option value="reccy.users.models.UserConfirmation.objects" />
+          <option value="reccy.users.models.UserConfirmation.DoesNotExist" />
+        </list>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>
