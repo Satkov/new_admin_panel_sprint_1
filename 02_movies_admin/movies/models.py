@@ -66,7 +66,7 @@ class GenreFilmwork(UUIDMixin):
 
     class Meta:
         db_table = "content\".\"genre_film_work"
-        indexes = [models.Index(fields=['film_work', 'genre'], name='genre_film_work_idx')]
+        indexes = [models.Index(fields=['film_work_id', 'genre_id'], name='genre_film_work_idx')]
         verbose_name = _('Genres')
         verbose_name_plural = _('Genres')
 
@@ -95,7 +95,7 @@ class PersonFilmWork(models.Model):
 
     class Meta:
         db_table = "content\".\"PersonFilmWork"
-        indexes = [models.Index(fields=['film_work', 'person'], name='film_work_person_idx')]
+        indexes = [models.Index(fields=['film_work_id', 'person_id'], name='film_work_person_idx')]
         verbose_name = _('Cast')
         verbose_name_plural = _('Cast')
 

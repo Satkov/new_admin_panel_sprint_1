@@ -47,4 +47,4 @@ CREATE INDEX person_full_name_idx ON content.person(full_name);
 CREATE INDEX genre_name_idx ON content.genre(name);
 
 CREATE UNIQUE INDEX film_work_person_idx ON content.person_film_work (film_work_id, person_id);
-CREATE UNIQUE INDEX genre_film_work_idx ON content.genre_film_work (genre_id, film_work_id);
+CREATE UNIQUE INDEX genre_film_work_idx ON content.genre_film_work (film_work_id, genre_id);
