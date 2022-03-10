@@ -103,13 +103,13 @@ def load_from_sqlite(connection: sqlite3.Connection, pg_conn: _connection):
     pg_cursor.execute("""TRUNCATE content.filmwork CASCADE""")
     pg_cursor.execute("""TRUNCATE content.genre CASCADE""")
 
-    data = [f"{item.id} | {item.full_name} | {item.created} | {item.modified}" for item in persons]
-    args = ','.join(pg_cursor.mogrify("(%s, %s, %s, %s)", item.split(' | ')).decode() for item in data)
-    pg_cursor.execute(f"""
-        INSERT INTO content.Person (id, full_name, created, modified)
-        VALUES {args}
-        ON CONFLICT (id) DO NOTHING
-        """)
+    # data = [f"{item.id} | {item.full_name} | {item.created} | {item.modified}" for item in persons]
+    # args = ','.join(pg_cursor.mogrify("(%s, %s, %s, %s)", item.split(' | ')).decode() for item in data)
+    # pg_cursor.execute(f"""
+    #     INSERT INTO content.Person (id, full_name, created, modified)
+    #     VALUES {args}
+    #     ON CONFLICT (id) DO NOTHING
+    #     """)
 
     data = [f"{item.id} | {item.title} | {item.description} | {item.creation_date} | "
             f"{item.rating} | {item.type} | {item.created} | {item.modified}" for item in film_works]
@@ -120,31 +120,32 @@ def load_from_sqlite(connection: sqlite3.Connection, pg_conn: _connection):
         VALUES {args}
         ON CONFLICT (id) DO NOTHING
         """)
+    #
+    # data = [f"{item.id} | {item.name} | {item.description}" for item in genres]
+    # args = ','.join(pg_cursor.mogrify("(%s, %s, %s)", item.split(' | ')).decode() for item in data)
+    # pg_cursor.execute(f"""
+    #     INSERT INTO content.genre (id, name, description)
+    #     VALUES {args}
+    #     ON CONFLICT (id) DO NOTHING
+    #     """)
+    #
+    # data = [f"{item.id} | {item.film_work} | {item.person} | {item.role} | {item.created}" for item in person_film_works]
+    # args = ','.join(pg_cursor.mogrify("(%s, %s, %s, %s, %s)", item.split(' | ')).decode() for item in data)
+    # pg_cursor.execute(f"""
+    #         INSERT INTO content.person_filmwork (id, film_work, person, role, created)
+    #         VALUES {args}
+    #         ON CONFLICT (id) DO NOTHING
+    #         """)
+    #
+    # data = [f"{item.id} | {item.film_work} | {item.genre} | {item.created}" for item in genre_film_works]
+    # args = ','.join(pg_cursor.mogrify("(%s, %s, %s, %s)", item.split(' | ')).decode() for item in data)
+    # pg_cursor.execute(f"""
+    #             INSERT INTO content.person_filmwork (id, film_work, genre, created)
+    #             VALUES {args}
+    #             ON CONFLICT (id) DO NOTHING
+    #             """)
 
-    data = [f"{item.id} | {item.name} | {item.description}" for item in genres]
-    args = ','.join(pg_cursor.mogrify("(%s, %s, %s)", item.split(' | ')).decode() for item in data)
-    pg_cursor.execute(f"""
-        INSERT INTO content.genre (id, name, description)
-        VALUES {args}
-        ON CONFLICT (id) DO NOTHING
-        """)
-
-    data = [f"{item.id} | {item.film_work} | {item.person} | {item.role} | {item.created}" for item in person_film_works]
-    args = ','.join(pg_cursor.mogrify("(%s, %s, %s, %s, %s)", item.split(' | ')).decode() for item in data)
-    pg_cursor.execute(f"""
-            INSERT INTO content.person_filmwork (id, film_work, person, role, created)
-            VALUES {args}
-            ON CONFLICT (id) DO NOTHING
-            """)
-
-    data = [f"{item.id} | {item.film_work} | {item.genre} | {item.created}" for item in genre_film_works]
-    args = ','.join(pg_cursor.mogrify("(%s, %s, %s, %s)", item.split(' | ')).decode() for item in data)
-    pg_cursor.execute(f"""
-                INSERT INTO content.person_filmwork (id, film_work, genre, created)
-                VALUES {args}
-                ON CONFLICT (id) DO NOTHING
-                """)
-
+    # print(args)
 
 if __name__ == '__main__':
     dsl = {'dbname': 'movies_database', 'user': 'app', 'password': '123qwe', 'host': '127.0.0.1', 'port': 5432}
