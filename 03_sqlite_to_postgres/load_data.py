@@ -1,4 +1,6 @@
+import datetime
 import sqlite3
+import uuid
 
 import psycopg2
 from psycopg2.extensions import connection as _connection
@@ -45,12 +47,11 @@ class PersonFilmWork:
 
 @dataclass(frozen=True)
 class Filmwork:
-    __slots__ = ('id', 'title', 'description', 'creation_date', 'rating', 'type', 'created', 'modified')
-    id: str
+    id: uuid
     title: str
     description: str
-    creation_date: str
-    rating: str
+    creation_date: datetime
+    rating: float
     type: str
     created: str
     modified: str
@@ -74,7 +75,7 @@ def fill_dataclass(data, table):
             result.append(T)
     if table == Genre:
         for fields in data:
-            T = table(fields[0], fields[1], fields[2])
+            T = table(fields[0], fields[1], datetime.datetime.now())
             result.append(T)
     if table == PersonFilmWork:
         for fields in data:
@@ -85,6 +86,18 @@ def fill_dataclass(data, table):
             T = table(fields[0], fields[1], fields[2], fields[3], fields[5], fields[6], fields[7], fields[8])
             result.append(T)
     return result
+
+
+def execute_migration(table, fields, data, pg_cursor):
+    format_symbols = '%s, ' * len(fields.split(','))
+    args = ','.join(pg_cursor.mogrify(f"({format_symbols[:-2]})",
+                                      item).decode() for item in data)
+    sql = (f"""
+        INSERT INTO content.{table} ({fields})
+        VALUES {args}
+        ON CONFLICT (id) DO NOTHING
+        """)
+    pg_cursor.execute(sql)
 
 
 def load_from_sqlite(connection: sqlite3.Connection, pg_conn: _connection):
@@ -103,49 +116,36 @@ def load_from_sqlite(connection: sqlite3.Connection, pg_conn: _connection):
     pg_cursor.execute("""TRUNCATE content.filmwork CASCADE""")
     pg_cursor.execute("""TRUNCATE content.genre CASCADE""")
 
-    # data = [f"{item.id} | {item.full_name} | {item.created} | {item.modified}" for item in persons]
-    # args = ','.join(pg_cursor.mogrify("(%s, %s, %s, %s)", item.split(' | ')).decode() for item in data)
-    # pg_cursor.execute(f"""
-    #     INSERT INTO content.Person (id, full_name, created, modified)
-    #     VALUES {args}
-    #     ON CONFLICT (id) DO NOTHING
-    #     """)
+    # Person
+    data = [(item.id, item.full_name, item.created, item.modified) for item in persons]
+    columns = 'id, full_name, created, modified'
+    execute_migration('Person', columns, data, pg_cursor)
 
-    data = [f"{item.id} | {item.title} | {item.description} | {item.creation_date} | "
-            f"{item.rating} | {item.type} | {item.created} | {item.modified}" for item in film_works]
-    args = ','.join(pg_cursor.mogrify("(%s, %s, %s, %s, %s, %s, %s, %s)",
-                                      item.split(' | ')).decode() for item in data)
-    pg_cursor.execute(f"""
-        INSERT INTO content.filmwork (id, title, description, creation_date, rating, type, created, modified)
-        VALUES {args}
-        ON CONFLICT (id) DO NOTHING
-        """)
+    # Filmwork
+    data = [(item.id, item.title, item.description, item.creation_date,
+            item.rating, item.type, item.created, item.modified) for item in film_works]
+    columns = 'id, title, description, creation_date, rating, type, created, modified'
+    execute_migration('filmwork', columns, data, pg_cursor)
     #
+    # # Genre
     # data = [f"{item.id} | {item.name} | {item.description}" for item in genres]
-    # args = ','.join(pg_cursor.mogrify("(%s, %s, %s)", item.split(' | ')).decode() for item in data)
-    # pg_cursor.execute(f"""
-    #     INSERT INTO content.genre (id, name, description)
-    #     VALUES {args}
-    #     ON CONFLICT (id) DO NOTHING
-    #     """)
+    # columns = 'id, name, description'
+    # execute_migration('genre', columns, data, pg_cursor)
+
+    # # Person_filmwork
+    # data = [f"{item.id} | {item.film_work} | {item.person} | {item.role} |"
+    #         f" {item.created}" for item in person_film_works]
+    # columns = 'id, film_work_id, person_id, role, created'
+    # execute_migration('person_filmwork', columns, data, pg_cursor)
     #
-    # data = [f"{item.id} | {item.film_work} | {item.person} | {item.role} | {item.created}" for item in person_film_works]
-    # args = ','.join(pg_cursor.mogrify("(%s, %s, %s, %s, %s)", item.split(' | ')).decode() for item in data)
-    # pg_cursor.execute(f"""
-    #         INSERT INTO content.person_filmwork (id, film_work, person, role, created)
-    #         VALUES {args}
-    #         ON CONFLICT (id) DO NOTHING
-    #         """)
-    #
+    # # Genre_filmwork
     # data = [f"{item.id} | {item.film_work} | {item.genre} | {item.created}" for item in genre_film_works]
-    # args = ','.join(pg_cursor.mogrify("(%s, %s, %s, %s)", item.split(' | ')).decode() for item in data)
-    # pg_cursor.execute(f"""
-    #             INSERT INTO content.person_filmwork (id, film_work, genre, created)
-    #             VALUES {args}
-    #             ON CONFLICT (id) DO NOTHING
-    #             """)
+    # columns = 'id, film_work_id, genre_id, created'
+    # execute_migration('genre_filmwork', columns, data, pg_cursor)
 
     # print(args)
+    connection.commit()
+
 
 if __name__ == '__main__':
     dsl = {'dbname': 'movies_database', 'user': 'app', 'password': '123qwe', 'host': '127.0.0.1', 'port': 5432}
