@@ -104,10 +104,11 @@ def load_from_sqlite(connection: sqlite3.Connection, pg_conn: _connection):
     pg_cursor.execute(f"""
         INSERT INTO content.Person (id, full_name, created, modified)
         VALUES {args}
+        ON CONFLICT (id) DO UPDATE SET name=EXCLUDED.full_name, EXCLUDED.created, EXCLUDED.modified,
         """)
 
     pg_cursor.execute("""SELECT id FROM content.Person """)
-    result = pg_cursor.fetchall()
+    result = pg_cursor.fetchone()
     print('Результат выполнения команды COPY ', result)
 
 
