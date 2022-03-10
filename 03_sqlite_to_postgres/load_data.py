@@ -1,12 +1,11 @@
 import datetime
 import sqlite3
 import uuid
+from dataclasses import dataclass
 
 import psycopg2
 from psycopg2.extensions import connection as _connection
 from psycopg2.extras import DictCursor
-
-from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
@@ -38,11 +37,11 @@ class GenreFilmwork:
 @dataclass(frozen=True)
 class PersonFilmWork:
     __slots__ = ('id', 'film_work', 'person', 'role', 'created')
-    id: str
-    film_work: str
-    person: str
+    id: uuid
+    film_work: uuid
+    person: uuid
     role: str
-    created: str
+    created: datetime
 
 
 @dataclass(frozen=True)
@@ -67,6 +66,7 @@ def get_data_from_table(table, cursor):
             yield result
 
 
+# не смог придумать, как сделать это красиво
 def fill_dataclass(data, table):
     result = []
     if table == Person or table == GenreFilmwork:
@@ -126,7 +126,7 @@ def load_from_sqlite(connection: sqlite3.Connection, pg_conn: _connection):
             item.rating, item.type, item.created, item.modified) for item in film_works]
     columns = 'id, title, description, creation_date, rating, type, created, modified'
     execute_migration('filmwork', columns, data, pg_cursor)
-    #
+
     # Genre
     data = [(item.id, item.name, item.description) for item in genres]
     columns = 'id, name, description'
@@ -142,7 +142,6 @@ def load_from_sqlite(connection: sqlite3.Connection, pg_conn: _connection):
     columns = 'id, film_work_id, genre_id, created'
     execute_migration('genre_filmwork', columns, data, pg_cursor)
 
-    # print(args)
     connection.commit()
 
 

@@ -43,7 +43,7 @@ class Filmwork(UUIDMixin, TimeStampedMixin):
     description = models.TextField(_('description'), null=True)
     creation_date = models.DateField(_('creation date'), null=True)
     rating = models.FloatField(_('rating'), blank=True, null=True, validators=[MinValueValidator(0),
-                                                                    MaxValueValidator(10)])
+                                                                               MaxValueValidator(10)])
     type = models.CharField(_('type'), max_length=50, choices=TYPE_CHOICES)
 
     class Meta:
