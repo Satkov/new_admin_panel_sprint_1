@@ -74,7 +74,7 @@ class GenreFilmwork(UUIDMixin):
         return ''
 
 
-class Person(TimeStampedMixin):
+class Person(UUIDMixin, TimeStampedMixin):
     full_name = models.CharField(_('full name'), max_length=50)
 
     class Meta:
@@ -87,7 +87,7 @@ class Person(TimeStampedMixin):
         return self.full_name
 
 
-class PersonFilmWork(models.Model):
+class PersonFilmWork(UUIDMixin):
     film_work = models.ForeignKey('Filmwork', on_delete=models.CASCADE)
     person = models.ForeignKey('Person', on_delete=models.CASCADE)
     role = models.TextField('role', null=True)
