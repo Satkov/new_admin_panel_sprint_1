@@ -89,27 +89,61 @@ def fill_dataclass(data, table):
 
 def load_from_sqlite(connection: sqlite3.Connection, pg_conn: _connection):
     """Основной метод загрузки данных из SQLite в Postgres"""
-    cursor = connection.cursor()
-    persons = fill_dataclass(get_data_from_table('person', cursor), Person)
-    genres = fill_dataclass(get_data_from_table('genre', cursor), Genre)
-    film_works = fill_dataclass(get_data_from_table('film_work', cursor), Filmwork)
-    person_film_works = fill_dataclass(get_data_from_table('person_film_work', cursor), PersonFilmWork)
-    genre_film_works = fill_dataclass(get_data_from_table('genre_film_work', cursor), GenreFilmwork)
-    cursor.close()
+    sqlite_cursor = connection.cursor()
+    persons = fill_dataclass(get_data_from_table('person', sqlite_cursor), Person)
+    genres = fill_dataclass(get_data_from_table('genre', sqlite_cursor), Genre)
+    film_works = fill_dataclass(get_data_from_table('film_work', sqlite_cursor), Filmwork)
+    person_film_works = fill_dataclass(get_data_from_table('person_film_work', sqlite_cursor), PersonFilmWork)
+    genre_film_works = fill_dataclass(get_data_from_table('genre_film_work', sqlite_cursor), GenreFilmwork)
+    sqlite_cursor.close()
 
     pg_cursor = pg_conn.cursor()
+
     pg_cursor.execute("""TRUNCATE content.person CASCADE""")
-    data = [f"{item.id}, {item.full_name}, {item.created}, {item.modified}" for item in persons]
-    args = ','.join(pg_cursor.mogrify("(%s, %s, %s, %s)", item.split(',')).decode() for item in data)
+    pg_cursor.execute("""TRUNCATE content.filmwork CASCADE""")
+    pg_cursor.execute("""TRUNCATE content.genre CASCADE""")
+
+    data = [f"{item.id} | {item.full_name} | {item.created} | {item.modified}" for item in persons]
+    args = ','.join(pg_cursor.mogrify("(%s, %s, %s, %s)", item.split(' | ')).decode() for item in data)
     pg_cursor.execute(f"""
         INSERT INTO content.Person (id, full_name, created, modified)
         VALUES {args}
-        ON CONFLICT (id) DO UPDATE SET name=EXCLUDED.full_name, EXCLUDED.created, EXCLUDED.modified,
+        ON CONFLICT (id) DO NOTHING
         """)
 
-    pg_cursor.execute("""SELECT id FROM content.Person """)
-    result = pg_cursor.fetchone()
-    print('Результат выполнения команды COPY ', result)
+    data = [f"{item.id} | {item.title} | {item.description} | {item.creation_date} | "
+            f"{item.rating} | {item.type} | {item.created} | {item.modified}" for item in film_works]
+    args = ','.join(pg_cursor.mogrify("(%s, %s, %s, %s, %s, %s, %s, %s)",
+                                      item.split(' | ')).decode() for item in data)
+    pg_cursor.execute(f"""
+        INSERT INTO content.filmwork (id, title, description, creation_date, rating, type, created, modified)
+        VALUES {args}
+        ON CONFLICT (id) DO NOTHING
+        """)
+
+    data = [f"{item.id} | {item.name} | {item.description}" for item in genres]
+    args = ','.join(pg_cursor.mogrify("(%s, %s, %s)", item.split(' | ')).decode() for item in data)
+    pg_cursor.execute(f"""
+        INSERT INTO content.genre (id, name, description)
+        VALUES {args}
+        ON CONFLICT (id) DO NOTHING
+        """)
+
+    data = [f"{item.id} | {item.film_work} | {item.person} | {item.role} | {item.created}" for item in person_film_works]
+    args = ','.join(pg_cursor.mogrify("(%s, %s, %s, %s, %s)", item.split(' | ')).decode() for item in data)
+    pg_cursor.execute(f"""
+            INSERT INTO content.person_filmwork (id, film_work, person, role, created)
+            VALUES {args}
+            ON CONFLICT (id) DO NOTHING
+            """)
+
+    data = [f"{item.id} | {item.film_work} | {item.genre} | {item.created}" for item in genre_film_works]
+    args = ','.join(pg_cursor.mogrify("(%s, %s, %s, %s)", item.split(' | ')).decode() for item in data)
+    pg_cursor.execute(f"""
+                INSERT INTO content.person_filmwork (id, film_work, genre, created)
+                VALUES {args}
+                ON CONFLICT (id) DO NOTHING
+                """)
 
 
 if __name__ == '__main__':
