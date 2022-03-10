@@ -47,7 +47,7 @@ class Filmwork(UUIDMixin, TimeStampedMixin):
     type = models.CharField(_('type'), max_length=50, choices=TYPE_CHOICES)
 
     class Meta:
-        db_table = "content\".\"films"
+        db_table = "content\".\"filmwork"
         indexes = [
             models.Index(fields=['title'], name='film_work_title_idx'),
             models.Index(fields=['creation_date'], name='film_work_creation_date_idx'),
@@ -65,7 +65,7 @@ class GenreFilmwork(UUIDMixin):
     created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = "content\".\"genre_film_work"
+        db_table = "content\".\"genre_filmwork"
         indexes = [models.Index(fields=['film_work_id', 'genre_id'], name='genre_film_work_idx')]
         verbose_name = _('Genres')
         verbose_name_plural = _('Genres')
@@ -78,7 +78,7 @@ class Person(UUIDMixin, TimeStampedMixin):
     full_name = models.CharField(_('full name'), max_length=50)
 
     class Meta:
-        db_table = "content\".\"Person"
+        db_table = "content\".\"person"
         indexes = [models.Index(fields=['full_name'], name='person_full_name_idx')]
         verbose_name = _('Actor')
         verbose_name_plural = _('Actor')
@@ -94,7 +94,7 @@ class PersonFilmWork(UUIDMixin):
     created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = "content\".\"PersonFilmWork"
+        db_table = "content\".\"person_filmwork"
         indexes = [models.Index(fields=['film_work_id', 'person_id'], name='film_work_person_idx')]
         verbose_name = _('Cast')
         verbose_name_plural = _('Cast')

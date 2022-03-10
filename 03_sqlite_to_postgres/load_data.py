@@ -98,15 +98,16 @@ def load_from_sqlite(connection: sqlite3.Connection, pg_conn: _connection):
     cursor.close()
 
     pg_cursor = pg_conn.cursor()
-    pg_cursor.execute("""TRUNCATE content.person""")
-    args = ','.join(pg_cursor.mogrify("(%s, %s)", item).decode() for item in persons)
+    pg_cursor.execute("""TRUNCATE content.person CASCADE""")
+    data = [f"{item.id}, {item.full_name}, {item.created}, {item.modified}" for item in persons]
+    args = ','.join(pg_cursor.mogrify("(%s, %s, %s, %s)", item.split(',')).decode() for item in data)
     pg_cursor.execute(f"""
-        INSERT INTO content.persons (id, full_name, created, modified)
+        INSERT INTO content.Person (id, full_name, created, modified)
         VALUES {args}
         """)
 
-    cursor.execute("""SELECT id FROM content.person """)
-    result = cursor.fetchall()
+    pg_cursor.execute("""SELECT id FROM content.Person """)
+    result = pg_cursor.fetchall()
     print('Результат выполнения команды COPY ', result)
 
 
