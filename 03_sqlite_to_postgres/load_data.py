@@ -12,16 +12,16 @@ from dataclasses import dataclass
 @dataclass(frozen=True)
 class Person:
     __slots__ = ('id', 'full_name', 'created', 'modified')
-    id: str
+    id: uuid
     full_name: str
-    created: str
-    modified: str
+    created: datetime
+    modified: datetime
 
 
 @dataclass(frozen=True)
 class Genre:
     __slots__ = ('id', 'name', 'description')
-    id: str
+    id: uuid
     name: str
     description: str
 
@@ -29,10 +29,10 @@ class Genre:
 @dataclass(frozen=True)
 class GenreFilmwork:
     __slots__ = ('id', 'film_work', 'genre', 'created')
-    id: str
-    film_work: str
-    genre: str
-    created: str
+    id: uuid
+    film_work: uuid
+    genre: uuid
+    created: datetime
 
 
 @dataclass(frozen=True)
@@ -53,8 +53,8 @@ class Filmwork:
     creation_date: datetime
     rating: float
     type: str
-    created: str
-    modified: str
+    created: datetime
+    modified: datetime
 
 
 def get_data_from_table(table, cursor):
@@ -75,7 +75,7 @@ def fill_dataclass(data, table):
             result.append(T)
     if table == Genre:
         for fields in data:
-            T = table(fields[0], fields[1], datetime.datetime.now())
+            T = table(fields[0], fields[1], fields[2])
             result.append(T)
     if table == PersonFilmWork:
         for fields in data:
@@ -127,21 +127,20 @@ def load_from_sqlite(connection: sqlite3.Connection, pg_conn: _connection):
     columns = 'id, title, description, creation_date, rating, type, created, modified'
     execute_migration('filmwork', columns, data, pg_cursor)
     #
-    # # Genre
-    # data = [f"{item.id} | {item.name} | {item.description}" for item in genres]
-    # columns = 'id, name, description'
-    # execute_migration('genre', columns, data, pg_cursor)
+    # Genre
+    data = [(item.id, item.name, item.description) for item in genres]
+    columns = 'id, name, description'
+    execute_migration('genre', columns, data, pg_cursor)
 
-    # # Person_filmwork
-    # data = [f"{item.id} | {item.film_work} | {item.person} | {item.role} |"
-    #         f" {item.created}" for item in person_film_works]
-    # columns = 'id, film_work_id, person_id, role, created'
-    # execute_migration('person_filmwork', columns, data, pg_cursor)
-    #
-    # # Genre_filmwork
-    # data = [f"{item.id} | {item.film_work} | {item.genre} | {item.created}" for item in genre_film_works]
-    # columns = 'id, film_work_id, genre_id, created'
-    # execute_migration('genre_filmwork', columns, data, pg_cursor)
+    # Person_filmwork
+    data = [(item.id, item.film_work, item.person, item.role, item.created) for item in person_film_works]
+    columns = 'id, film_work_id, person_id, role, created'
+    execute_migration('person_filmwork', columns, data, pg_cursor)
+
+    # Genre_filmwork
+    data = [(item.id, item.film_work, item.genre, item.created) for item in genre_film_works]
+    columns = 'id, film_work_id, genre_id, created'
+    execute_migration('genre_filmwork', columns, data, pg_cursor)
 
     # print(args)
     connection.commit()
