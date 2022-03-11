@@ -113,12 +113,12 @@ def test_column_content_is_same(connection: sqlite3.Connection, pg_conn: _connec
         sql_data = get_data_from_table(sqlite_table, sqlite_cursor)
         pg_data = get_data_from_table(tables[sqlite_table], pg_cursor)
 
-        sqlite_dataclasses = fill_sqlite_dataclass(sql_data, table_objs[sqlite_table])
-        pg_dataclasses = fill_pg_dataclass(pg_data, table_objs[sqlite_table])
+        sqlite_data_objs = fill_sqlite_dataclass(sql_data, table_objs[sqlite_table])
+        pg_data_objs = fill_pg_dataclass(pg_data, table_objs[sqlite_table])
 
-        ids = get_all_ids_from_table(tables[sqlite_table], pg_cursor)
+        ids = get_all_ids_from_table(sqlite_table, sqlite_cursor)
         for id in ids:
-            assert sqlite_dataclasses[id] == pg_dataclasses[id], f'Значения полей в записи {id} различаются'
+            assert sqlite_data_objs[id] == pg_data_objs[id], f'Значения полей в записи {id} различаются'
 
 
 if __name__ == '__main__':
