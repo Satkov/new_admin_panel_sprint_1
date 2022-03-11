@@ -1,59 +1,11 @@
-import datetime
 import sqlite3
-import uuid
-from dataclasses import dataclass
 
 import psycopg2
 from psycopg2.extensions import connection as _connection
 from psycopg2.extras import DictCursor
 
-
-@dataclass(frozen=True)
-class Person:
-    __slots__ = ('id', 'full_name', 'created', 'modified')
-    id: uuid
-    full_name: str
-    created: datetime
-    modified: datetime
-
-
-@dataclass(frozen=True)
-class Genre:
-    __slots__ = ('id', 'name', 'description')
-    id: uuid
-    name: str
-    description: str
-
-
-@dataclass(frozen=True)
-class GenreFilmwork:
-    __slots__ = ('id', 'film_work', 'genre', 'created')
-    id: uuid
-    film_work: uuid
-    genre: uuid
-    created: datetime
-
-
-@dataclass(frozen=True)
-class PersonFilmWork:
-    __slots__ = ('id', 'film_work', 'person', 'role', 'created')
-    id: uuid
-    film_work: uuid
-    person: uuid
-    role: str
-    created: datetime
-
-
-@dataclass(frozen=True)
-class Filmwork:
-    id: uuid
-    title: str
-    description: str
-    creation_date: datetime
-    rating: float
-    type: str
-    created: datetime
-    modified: datetime
+from table_objects import (Filmwork, Genre, GenreFilmwork, Person,
+                           PersonFilmWork)
 
 
 def get_data_from_table(table, cursor):
@@ -66,34 +18,36 @@ def get_data_from_table(table, cursor):
             yield result
 
 
-# не смог придумать, как сделать это красиво
 def fill_dataclass(data, table):
+    """
+    Взависимости от таблицы, по очереди вынемает значение полей
+    датакласса из словаря и заполняет его данными из sqlite
+    """
     result = []
-    if table == Person or table == GenreFilmwork:
-        for fields in data:
-            T = table(fields[0], fields[1], fields[2], fields[3])
-            result.append(T)
-    if table == Genre:
-        for fields in data:
-            T = table(fields[0], fields[1], fields[2])
-            result.append(T)
-    if table == PersonFilmWork:
-        for fields in data:
-            T = table(fields[0], fields[1], fields[2], fields[3], fields[4])
-            result.append(T)
-    if table == Filmwork:
-        for fields in data:
-            T = table(fields[0], fields[1], fields[2], fields[3], fields[5], fields[6], fields[7], fields[8])
-            result.append(T)
+    for columns in data:
+        fields = {
+            Person: ['id', 'full_name', 'created', 'modified'],
+            GenreFilmwork: ['id', 'film_work', 'genre', 'created'],
+            Genre: ['id', 'name', 'description', 'created', 'updated'],
+            PersonFilmWork: ['id', 'film_work', 'person', 'role', 'created'],
+            Filmwork: ['id', 'title', 'description', 'creation_date',
+                       'file_path', 'rating', 'type', 'created', 'modified']
+        }
+        Table = table()
+        for column_data in columns:
+            field_name = fields[table].pop(0)
+            setattr(Table, field_name, column_data)
+        result.append(Table)
+
     return result
 
 
-def execute_migration(table, fields, data, pg_cursor):
-    format_symbols = '%s, ' * len(fields.split(','))
+def execute_migration(table, columns, data, pg_cursor):
+    format_symbols = '%s, ' * len(columns.split(','))
     args = ','.join(pg_cursor.mogrify(f"({format_symbols[:-2]})",
                                       item).decode() for item in data)
     sql = (f"""
-        INSERT INTO content.{table} ({fields})
+        INSERT INTO content.{table} ({columns})
         VALUES {args}
         ON CONFLICT (id) DO NOTHING
         """)
@@ -112,9 +66,7 @@ def load_from_sqlite(connection: sqlite3.Connection, pg_conn: _connection):
 
     pg_cursor = pg_conn.cursor()
 
-    pg_cursor.execute("""TRUNCATE content.person CASCADE""")
-    pg_cursor.execute("""TRUNCATE content.filmwork CASCADE""")
-    pg_cursor.execute("""TRUNCATE content.genre CASCADE""")
+    pg_cursor.execute("""TRUNCATE content.person, content.filmwork, content.genre CASCADE""")
 
     # Person
     data = [(item.id, item.full_name, item.created, item.modified) for item in persons]
@@ -123,7 +75,7 @@ def load_from_sqlite(connection: sqlite3.Connection, pg_conn: _connection):
 
     # Filmwork
     data = [(item.id, item.title, item.description, item.creation_date,
-            item.rating, item.type, item.created, item.modified) for item in film_works]
+             item.rating, item.type, item.created, item.modified) for item in film_works]
     columns = 'id, title, description, creation_date, rating, type, created, modified'
     execute_migration('filmwork', columns, data, pg_cursor)
 
@@ -142,6 +94,7 @@ def load_from_sqlite(connection: sqlite3.Connection, pg_conn: _connection):
     columns = 'id, film_work_id, genre_id, created'
     execute_migration('genre_filmwork', columns, data, pg_cursor)
 
+    # print(args)
     connection.commit()
 
 
