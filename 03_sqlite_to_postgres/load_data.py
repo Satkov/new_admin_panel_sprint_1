@@ -11,7 +11,6 @@ from table_objects import (Filmwork, Genre, GenreFilmwork, Person,
 
 def get_data_from_table(table, cursor):
     """
-
     @param table: str
     @param cursor: cursor_object
     @return: generator
@@ -27,7 +26,6 @@ def get_data_from_table(table, cursor):
 
 def fill_dataclass(data, table):
     """
-
     @param data: generator
     @param table: class
     @return: list[class_objects]
@@ -53,7 +51,6 @@ def fill_dataclass(data, table):
 
 def execute_migration(table, columns, data, pg_cursor):
     """
-
     @param table: str
     @param columns: str
     @param data: list[tuple(str)]

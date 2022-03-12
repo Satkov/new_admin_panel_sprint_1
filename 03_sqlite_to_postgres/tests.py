@@ -12,7 +12,6 @@ from table_objects import (Filmwork, Genre, GenreFilmwork, Person,
 
 def count_records_in_table(table, cursor):
     """
-
     @param table: str
     @param cursor: cursor_object
     @return: str
@@ -23,7 +22,6 @@ def count_records_in_table(table, cursor):
 
 def get_all_ids_from_table(table, cursor):
     """
-
     @param table: str
     @param cursor: cursor_object
     @return: str
@@ -52,7 +50,6 @@ def test_number_of_records_are_same_in_both_tables(connection: sqlite3.Connectio
 
 def fill_sqlite_dataclass(data, table):
     """
-
     @param data: Generator[str]
     @param table: class
     @return: Dict{Table_id: Table:obj}
@@ -81,7 +78,6 @@ def fill_sqlite_dataclass(data, table):
 
 def fill_pg_dataclass(data, table):
     """
-
     @param data: Generator[str]
     @param table: class
     @return: Dict{Table_id: Table:obj}
