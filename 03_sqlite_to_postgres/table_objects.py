@@ -20,11 +20,11 @@ class Genre:
     updated: datetime = field(default=None)
 
     def __eq__(self, other):
-        """ Убрал лишние поля для удобства сравнения в тестировии """
-        return False not in (
+        """ Убрал поля created и updated для удобства сравнения в тестировии """
+        return all((
             self.id == other.id, self.name == other.name,
             self.description == other.description,
-        )
+        ))
 
 
 @dataclass()
@@ -57,9 +57,9 @@ class Filmwork:
     modified: datetime = field(default=None)
 
     def __eq__(self, other):
-        """ Убрал лишние поля для удобства сравнения в тестировии """
-        return False not in (
+        """ Убрал поле file_path для удобства сравнения в тестировии """
+        return all((
             self.id == other.id, self.title == other.title, self.description == other.description,
             self.creation_date == other.creation_date, self.rating == other.rating,
             self.type == other.type, self.created == other.created, self.modified == other.modified
-        )
+        ))

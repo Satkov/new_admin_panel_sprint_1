@@ -34,31 +34,6 @@ class Genre(UUIDMixin):
         return self.name
 
 
-class Filmwork(UUIDMixin, TimeStampedMixin):
-    TYPE_CHOICES = [
-        ('movie', _('Film')),
-        ('tv_show', _('TV show'))
-    ]
-    title = models.CharField(_('title'), max_length=100)
-    description = models.TextField(_('description'), null=True)
-    creation_date = models.DateField(_('creation date'), null=True)
-    rating = models.FloatField(_('rating'), blank=True, null=True, validators=[MinValueValidator(0),
-                                                                               MaxValueValidator(10)])
-    type = models.CharField(_('type'), max_length=50, choices=TYPE_CHOICES)
-
-    class Meta:
-        db_table = "content\".\"filmwork"
-        indexes = [
-            models.Index(fields=['title'], name='film_work_title_idx'),
-            models.Index(fields=['creation_date'], name='film_work_creation_date_idx'),
-        ]
-        verbose_name = _('Films')
-        verbose_name_plural = _('Films')
-
-    def __str__(self):
-        return self.title
-
-
 class GenreFilmwork(UUIDMixin):
     film_work = models.ForeignKey('Filmwork', on_delete=models.CASCADE)
     genre = models.ForeignKey('Genre', on_delete=models.CASCADE)
@@ -88,9 +63,14 @@ class Person(UUIDMixin, TimeStampedMixin):
 
 
 class PersonFilmWork(UUIDMixin):
+    ROLE_CHOICES = [
+        ('writer', _('writer')),
+        ('actor', _('actor')),
+        ('director', _('director'))
+    ]
     film_work = models.ForeignKey('Filmwork', on_delete=models.CASCADE)
     person = models.ForeignKey('Person', on_delete=models.CASCADE)
-    role = models.TextField('role', null=True)
+    role = models.CharField(_('role'), max_length=10, choices=ROLE_CHOICES)
     created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -101,3 +81,28 @@ class PersonFilmWork(UUIDMixin):
 
     def __str__(self):
         return ''
+
+
+class Filmwork(UUIDMixin, TimeStampedMixin):
+    TYPE_CHOICES = [
+        ('movie', _('Film')),
+        ('tv_show', _('TV show'))
+    ]
+    title = models.CharField(_('title'), max_length=100)
+    description = models.TextField(_('description'), null=True)
+    creation_date = models.DateField(_('creation date'), null=True)
+    rating = models.FloatField(_('rating'), blank=True, null=True, validators=[MinValueValidator(0),
+                                                                               MaxValueValidator(10)])
+    type = models.CharField(_('type'), max_length=50, choices=TYPE_CHOICES)
+
+    class Meta:
+        db_table = "content\".\"filmwork"
+        indexes = [
+            models.Index(fields=['title'], name='film_work_title_idx'),
+            models.Index(fields=['creation_date'], name='film_work_creation_date_idx'),
+        ]
+        verbose_name = _('Films')
+        verbose_name_plural = _('Films')
+
+    def __str__(self):
+        return self.title

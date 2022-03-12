@@ -1,6 +1,8 @@
+import os
 import sqlite3
 
 import psycopg2
+from dotenv import load_dotenv
 from psycopg2.extensions import connection as _connection
 from psycopg2.extras import DictCursor
 
@@ -10,11 +12,23 @@ from table_objects import (Filmwork, Genre, GenreFilmwork, Person,
 
 
 def count_records_in_table(table, cursor):
+    """
+
+    @param table: str
+    @param cursor: cursor_object
+    @return: str
+    """
     cursor.execute(f"SELECT COUNT(*) FROM {table}")
     return cursor.fetchone()[0]
 
 
 def get_all_ids_from_table(table, cursor):
+    """
+
+    @param table: str
+    @param cursor: cursor_object
+    @return: str
+    """
     cursor.execute(f"SELECT id  FROM {table}")
     return cursor.fetchone()
 
@@ -39,8 +53,10 @@ def test_number_of_records_are_same_in_both_tables(connection: sqlite3.Connectio
 
 def fill_sqlite_dataclass(data, table):
     """
-    result: {Table_id: TableObj}
-    Привожу дату в таблицах к единому формату и помещаю в словарь.
+
+    @param data: Generator[str]
+    @param table: class
+    @return: Dict{Table_id: Table:obj}
     """
     result = {}
     for columns in data:
@@ -66,7 +82,10 @@ def fill_sqlite_dataclass(data, table):
 
 def fill_pg_dataclass(data, table):
     """
-    result: {Table_id: TableObj}
+
+    @param data: Generator[str]
+    @param table: class
+    @return: Dict{Table_id: Table:obj}
     """
     result = {}
     for columns in data:
@@ -122,7 +141,10 @@ def test_column_content_is_same(connection: sqlite3.Connection, pg_conn: _connec
 
 
 if __name__ == '__main__':
-    dsl = {'dbname': 'movies_database', 'user': 'app', 'password': '123qwe', 'host': '127.0.0.1', 'port': 5432}
+    load_dotenv()
+    dsl = {'dbname': os.environ.get('DB_NAME'), 'user': os.environ.get('DB_USER'),
+           'password': os.environ.get('DB_PASSWORD'), 'host': os.environ.get('DB_HOST'),
+           'port': os.environ.get('DB_PORT')}
     with sqlite3.connect('db.sqlite') as sqlite_conn, psycopg2.connect(**dsl, cursor_factory=DictCursor) as pg_conn:
         test_number_of_records_are_same_in_both_tables(sqlite_conn, pg_conn)
         test_column_content_is_same(sqlite_conn, pg_conn)

@@ -1,6 +1,8 @@
+import os
 import sqlite3
 
 import psycopg2
+from dotenv import load_dotenv
 from psycopg2.extensions import connection as _connection
 from psycopg2.extras import DictCursor
 
@@ -9,6 +11,12 @@ from table_objects import (Filmwork, Genre, GenreFilmwork, Person,
 
 
 def get_data_from_table(table, cursor):
+    """
+
+    @param table: str
+    @param cursor: cursor_object
+    @return: generator
+    """
     cursor.execute(f"SELECT * FROM {table}")
     while True:
         results = cursor.fetchmany(1000)
@@ -20,8 +28,10 @@ def get_data_from_table(table, cursor):
 
 def fill_dataclass(data, table):
     """
-    Взависимости от таблицы, по очереди вынемает значение полей
-    датакласса из словаря и заполняет его данными из sqlite
+
+    @param data: generator
+    @param table: class
+    @return: list[class_objects]
     """
     result = []
     for columns in data:
@@ -43,9 +53,15 @@ def fill_dataclass(data, table):
 
 
 def execute_migration(table, columns, data, pg_cursor):
+    """
+
+    @param table: str
+    @param columns: str
+    @param data: list[tuple(str)]
+    @param pg_cursor: cursor_object
+    """
     format_symbols = '%s, ' * len(columns.split(','))
-    args = ','.join(pg_cursor.mogrify(f"({format_symbols[:-2]})",
-                                      item).decode() for item in data)
+    args = ','.join(pg_cursor.mogrify(f"({format_symbols[:-2]})", item).decode() for item in data)
     sql = (f"""
         INSERT INTO content.{table} ({columns})
         VALUES {args}
@@ -94,11 +110,13 @@ def load_from_sqlite(connection: sqlite3.Connection, pg_conn: _connection):
     columns = 'id, film_work_id, genre_id, created'
     execute_migration('genre_filmwork', columns, data, pg_cursor)
 
-    # print(args)
     connection.commit()
 
 
 if __name__ == '__main__':
-    dsl = {'dbname': 'movies_database', 'user': 'app', 'password': '123qwe', 'host': '127.0.0.1', 'port': 5432}
+    load_dotenv()
+    dsl = {'dbname': os.environ.get('DB_NAME'), 'user': os.environ.get('DB_USER'),
+           'password': os.environ.get('DB_PASSWORD'), 'host': os.environ.get('DB_HOST'),
+           'port': os.environ.get('DB_PORT')}
     with sqlite3.connect('db.sqlite') as sqlite_conn, psycopg2.connect(**dsl, cursor_factory=DictCursor) as pg_conn:
         load_from_sqlite(sqlite_conn, pg_conn)
