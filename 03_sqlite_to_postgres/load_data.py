@@ -5,7 +5,6 @@ import psycopg2
 from dotenv import load_dotenv
 from psycopg2.extensions import connection as _connection
 from psycopg2.extras import DictCursor
-
 from table_objects import (Filmwork, Genre, GenreFilmwork, Person,
                            PersonFilmWork)
 

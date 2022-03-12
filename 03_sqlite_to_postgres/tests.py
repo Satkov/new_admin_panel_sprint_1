@@ -3,10 +3,9 @@ import sqlite3
 
 import psycopg2
 from dotenv import load_dotenv
+from load_data import get_data_from_table
 from psycopg2.extensions import connection as _connection
 from psycopg2.extras import DictCursor
-
-from load_data import get_data_from_table
 from table_objects import (Filmwork, Genre, GenreFilmwork, Person,
                            PersonFilmWork)
 
